@@ -1,31 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PianoKeyboard from './components/PianoKeyboard';
+import Soundfont, { Player } from 'soundfont-player';
 
 const App: React.FC = () => {
   const [pressedKeys, setPressedKeys] = useState<string[]>([]);
+  const playerRef = useRef<Player | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  const getMIDIKeyId = (note: number): string => `Key${note}`;
 
   useEffect(() => {
-    const handleMIDIMessage = (event: WebMidi.MIDIMessageEvent) => {
-      const [status, note, velocity] = event.data;
-      const noteId = `Key${note}`;
+    const initAudio = async () => {
+      audioContextRef.current = new AudioContext();
+      playerRef.current = await Soundfont.instrument(
+        audioContextRef.current,
+        'acoustic_grand_piano'
+      );
+    };
 
-      console.log(`MIDI event received: status=${status}, note=${note}, velocity=${velocity}`);
-
-      if (status === 144 && velocity > 0) { // Note on
-        setPressedKeys((prevKeys) => {
-          if (!prevKeys.includes(noteId)) {
-            const newKeys = [...prevKeys, noteId];
-            console.log(`Note on: ${noteId}, pressedKeys: ${newKeys}`);
-            return newKeys;
-          }
-          return prevKeys;
-        });
-      } else if (status === 128 || (status === 144 && velocity === 0)) { // Note off
-        setPressedKeys((prevKeys) => {
-          const newKeys = prevKeys.filter((key) => key !== noteId);
-          console.log(`Note off: ${noteId}, pressedKeys: ${newKeys}`);
-          return newKeys;
-        });
+    const handleMIDIMessage = (message: WebMidi.MIDIMessageEvent) => {
+      const [status, note, velocity] = message.data;
+      const keyId = getMIDIKeyId(note);
+      
+      // Note on (144) with velocity > 0
+      if (status === 144 && velocity > 0) {
+        setPressedKeys(prev => [...prev, keyId]);
+        playerRef.current?.play(note.toString());
+      }
+      // Note off (128) or note on with velocity 0
+      else if (status === 128 || (status === 144 && velocity === 0)) {
+        setPressedKeys(prev => prev.filter(key => key !== keyId));
+        playerRef.current?.stop();
       }
     };
 
@@ -38,10 +43,12 @@ const App: React.FC = () => {
       }
     };
 
+    initAudio();
     initMIDI();
 
     return () => {
-      // Cleanup MIDI event listeners if necessary
+      audioContextRef.current?.close();
+      playerRef.current?.stop();
     };
   }, []);
 
