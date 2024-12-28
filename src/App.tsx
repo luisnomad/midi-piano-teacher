@@ -9,10 +9,23 @@ const App: React.FC = () => {
       const [status, note, velocity] = event.data;
       const noteId = `Key${note}`;
 
+      console.log(`MIDI event received: status=${status}, note=${note}, velocity=${velocity}`);
+
       if (status === 144 && velocity > 0) { // Note on
-        setPressedKeys((prevKeys) => [...prevKeys, noteId]);
+        setPressedKeys((prevKeys) => {
+          if (!prevKeys.includes(noteId)) {
+            const newKeys = [...prevKeys, noteId];
+            console.log(`Note on: ${noteId}, pressedKeys: ${newKeys}`);
+            return newKeys;
+          }
+          return prevKeys;
+        });
       } else if (status === 128 || (status === 144 && velocity === 0)) { // Note off
-        setPressedKeys((prevKeys) => prevKeys.filter((key) => key !== noteId));
+        setPressedKeys((prevKeys) => {
+          const newKeys = prevKeys.filter((key) => key !== noteId);
+          console.log(`Note off: ${noteId}, pressedKeys: ${newKeys}`);
+          return newKeys;
+        });
       }
     };
 

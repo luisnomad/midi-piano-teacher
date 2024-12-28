@@ -6,33 +6,34 @@ interface PianoKeyboardProps {
 
 const PianoKeyboard: React.FC<PianoKeyboardProps> = ({ pressedKeys = [] }) => {
   const whiteKeys = [
-    { id: 'Key60', note: 'C', x: 0 },
-    { id: 'Key62', note: 'D', x: 50 },
-    { id: 'Key64', note: 'E', x: 100 },
-    { id: 'Key65', note: 'F', x: 150 },
-    { id: 'Key67', note: 'G', x: 200 },
-    { id: 'Key69', note: 'A', x: 250 },
-    { id: 'Key71', note: 'B', x: 300 },
-    { id: 'Key72', note: 'C', x: 350 },
-    { id: 'Key74', note: 'D', x: 400 },
-    { id: 'Key76', note: 'E', x: 450 },
-    { id: 'Key77', note: 'F', x: 500 },
-    { id: 'Key79', note: 'G', x: 550 },
-    { id: 'Key81', note: 'A', x: 600 },
-    { id: 'Key83', note: 'B', x: 650 }
+    { id: 'Key48', note: 'C1', x: 0 },
+    { id: 'Key50', note: 'D1', x: 50 },
+    { id: 'Key52', note: 'E1', x: 100 },
+    { id: 'Key53', note: 'F1', x: 150 },
+    { id: 'Key55', note: 'G1', x: 200 },
+    { id: 'Key57', note: 'A1', x: 250 },
+    { id: 'Key59', note: 'B1', x: 300 },
+    { id: 'Key60', note: 'C2', x: 350 },
+    { id: 'Key62', note: 'D2', x: 400 },
+    { id: 'Key64', note: 'E2', x: 450 },
+    { id: 'Key65', note: 'F2', x: 500 },
+    { id: 'Key67', note: 'G2', x: 550 },
+    { id: 'Key69', note: 'A2', x: 600 },
+    { id: 'Key71', note: 'B2', x: 650 },
+    { id: 'Key72', note: 'C3', x: 700 }
   ];
 
   const blackKeys = [
-    { id: 'Key61', note: 'C#', x: 35 },
-    { id: 'Key63', note: 'D#', x: 85 },
-    { id: 'Key66', note: 'F#', x: 185 },
-    { id: 'Key68', note: 'G#', x: 235 },
-    { id: 'Key70', note: 'A#', x: 285 },
-    { id: 'Key73', note: 'C#', x: 385 },
-    { id: 'Key75', note: 'D#', x: 435 },
-    { id: 'Key78', note: 'F#', x: 535 },
-    { id: 'Key80', note: 'G#', x: 585 },
-    { id: 'Key82', note: 'A#', x: 635 }
+    { id: 'Key49', note: 'C#1', x: 35 },
+    { id: 'Key51', note: 'D#1', x: 85 },
+    { id: 'Key54', note: 'F#1', x: 185 },
+    { id: 'Key56', note: 'G#1', x: 235 },
+    { id: 'Key58', note: 'A#1', x: 285 },
+    { id: 'Key61', note: 'C#2', x: 385 },
+    { id: 'Key63', note: 'D#2', x: 435 },
+    { id: 'Key66', note: 'F#2', x: 535 },
+    { id: 'Key68', note: 'G#2', x: 585 },
+    { id: 'Key70', note: 'A#2', x: 635 }
   ];
 
   return (
