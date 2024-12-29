@@ -36,6 +36,8 @@ interface Note {
   isPlaying: boolean;
   /** Whether note has been played in current session */
   hasPlayed: boolean;
+  /** Track number */
+  track: number;
 }
 
 function getNoteName(noteNumber: number) {
@@ -104,14 +106,15 @@ const MidiPlayer = () => {
           const midi = new Midi(e.target?.result as ArrayBuffer);
           
           // Convert MIDI data to our format
-          const notes: Note[] = midi.tracks.flatMap(track => 
+          const notes: Note[] = midi.tracks.flatMap((track, trackIndex) => 
             track.notes.map(note => ({
               note: note.midi,
               time: note.time,
               duration: note.duration,
               velocity: note.velocity,
               isPlaying: false,
-              hasPlayed: false
+              hasPlayed: false,
+              track: trackIndex // Include track number
             }))
           ).sort((a, b) => a.time - b.time);
 
@@ -279,8 +282,8 @@ const MidiPlayer = () => {
         notes={midiData.map(m => ({
           note: getNoteName(m.note),
           startTime: m.time,
-          duration: m.duration
-
+          duration: m.duration,
+          track: m.track // Ensure track number is included
         }))}
         currentTime={currentTime}
       />}

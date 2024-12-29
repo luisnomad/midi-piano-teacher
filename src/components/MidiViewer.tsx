@@ -4,12 +4,24 @@ interface NoteEvent {
   note: string;      // e.g. "C#", "D", etc.
   startTime: number; // in seconds
   duration: number;  // in seconds
+  track: number;     // track number
 }
 
 interface MidiViewerProps {
   notes: NoteEvent[];
   currentTime: number;
 }
+
+const trackColors = [
+  'bg-blue-500',
+  'bg-green-500',
+  'bg-red-500',
+  'bg-yellow-500',
+  'bg-purple-500',
+  'bg-pink-500',
+  'bg-indigo-500',
+  'bg-teal-500',
+];
 
 export default function MidiViewer({ notes, currentTime }: MidiViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,11 +43,12 @@ export default function MidiViewer({ notes, currentTime }: MidiViewerProps) {
         {notes.map((note, idx) => (
           <div
             key={idx}
-            className="absolute bg-blue-500 text-white px-2 py-1 rounded"
+            className={`absolute text-white px-2 py-1 rounded ${trackColors[note.track % trackColors.length]}`}
             style={{
               left: note.startTime * 100,
-              height: '100%',
-              width: 40,
+              top: `${note.track * 20}px`, // Adjust vertical position based on track number
+              height: '20px',
+              width: `${note.duration * 100}px`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
