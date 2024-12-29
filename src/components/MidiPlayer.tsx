@@ -1,47 +1,20 @@
-/**
- * MidiPlayer Component
- * 
- * A component that loads and plays MIDI files using the Web Audio API and Soundfont.
- * Features:
- * - MIDI file upload and parsing using @tonejs/midi
- * - Real-time playback using soundfont-player
- * - Visual timeline representation
- * - Play/pause/reset controls
- * - Progress trackingxw
- * 
- * @component
- * @example
- * ```tsx
- * <MidiPlayer />
- * ```
- */
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Midi } from '@tonejs/midi';
 import Soundfont from 'soundfont-player';
 import { Upload, Play, Pause, RotateCcw } from 'lucide-react';
 import MidiViewer from './MidiViewer';
 
-/** Represents a single MIDI note with timing and playback state */
 interface Note {
-  /** MIDI note number (0-127) */
   note: number;
-  /** Start time in seconds */
   time: number;
-  /** Note duration in seconds */
   duration: number;
-  /** Note velocity (0-1) */
   velocity: number;
-  /** Whether note is currently playing */
   isPlaying: boolean;
-  /** Whether note has been played in current session */
-  hasPlayed: boolean;
-  /** Track number */
   track: number;
 }
 
 function getNoteName(noteNumber: number) {
-  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#','G','G#','A','A#','B'];
+  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   return noteNames[noteNumber % 12] || 'Unknown';
 }
 
@@ -52,14 +25,15 @@ const MidiPlayer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState('');
-  
+  const [mutedTracks, setMutedTracks] = useState<number[]>([]);
+  const [activeSources, setActiveSources] = useState(new Map<string, any>()); // Map to hold active note sources
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const playerRef = useRef<Soundfont.Player | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Initialize audio context and soundfont player
   useEffect(() => {
     const initAudio = async () => {
       try {
@@ -84,7 +58,6 @@ const MidiPlayer = () => {
     };
   }, []);
 
-  // Handle file upload
   interface FileUploadEvent extends React.ChangeEvent<HTMLInputElement> {
     target: HTMLInputElement & EventTarget;
   }
@@ -98,23 +71,22 @@ const MidiPlayer = () => {
     setFileName(file.name);
     setCurrentTime(0);
     setIsPlaying(false);
+    setActiveSources(new Map());
 
     try {
       const reader = new FileReader();
       reader.onload = async (e: ProgressEvent<FileReader>) => {
         try {
           const midi = new Midi(e.target?.result as ArrayBuffer);
-          
-          // Convert MIDI data to our format
-          const notes: Note[] = midi.tracks.flatMap((track, trackIndex) => 
+
+          const notes: Note[] = midi.tracks.flatMap((track, trackIndex) =>
             track.notes.map(note => ({
               note: note.midi,
               time: note.time,
               duration: note.duration,
               velocity: note.velocity,
               isPlaying: false,
-              hasPlayed: false,
-              track: trackIndex // Include track number
+              track: trackIndex,
             }))
           ).sort((a, b) => a.time - b.time);
 
@@ -140,7 +112,6 @@ const MidiPlayer = () => {
     }
   };
 
-  // Handle playback animation and note triggering
   interface AnimationFrame {
     (timestamp: number): void;
   }
@@ -153,35 +124,40 @@ const MidiPlayer = () => {
     const newTime = (timestamp - startTimeRef.current) / 1000;
     setCurrentTime(newTime);
 
-    // Update notes' playing status and trigger new notes
-    const updatedNotes: Note[] = midiData.map(note => {
-      const isNoteCurrentlyPlaying = newTime >= note.time && 
-                                   newTime <= note.time + note.duration;
+      const updatedNotes: Note[] = midiData.map(note => {
+      const isNoteCurrentlyPlaying = newTime >= note.time &&
+        newTime <= note.time + note.duration;
       
-      // Trigger note if it's time to play and hasn't been played
-      if (newTime >= note.time && !note.hasPlayed && playerRef.current) {
-        playerRef.current.play(note.note.toString(), 0, {
-          duration: note.duration * 1000,
-          gain: note.velocity
-        });
-        note.hasPlayed = true;
-      }
+      const noteKey = `${note.note}-${note.time}-${note.track}`;
+      let source = activeSources.get(noteKey);
+
+       if (isNoteCurrentlyPlaying && !mutedTracks.includes(note.track)) {
+         if (!source && playerRef.current) {
+            source = playerRef.current.play(note.note.toString(), 0, {
+              duration: note.duration * 1000,
+              gain: note.velocity,
+            });
+            activeSources.set(noteKey, source);
+          }
+       } else {
+            if(source) {
+              source.stop();
+              activeSources.delete(noteKey);
+            }
+       }
 
       return {
         ...note,
-        isPlaying: isNoteCurrentlyPlaying
+        isPlaying: isNoteCurrentlyPlaying && !mutedTracks.includes(note.track)
       };
     });
 
-    setMidiData(updatedNotes);
-
-    // Continue animation if still playing
+      setMidiData(updatedNotes);
     if (isPlaying) {
       animationFrameRef.current = requestAnimationFrame(animate);
     }
   };
 
-  // Handle play/pause
   useEffect(() => {
     if (isPlaying) {
       if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
@@ -192,24 +168,30 @@ const MidiPlayer = () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+       // Stop all sources when paused
+      activeSources.forEach(source => source.stop());
+      setActiveSources(new Map());
+
     }
 
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+       // Stop all sources on unmount
+      activeSources.forEach(source => source.stop());
     };
   }, [isPlaying]);
 
   const handlePlayPause = () => {
-    if (!midiData.length) return;
+      if (!midiData.length) return;
     
     if (!isPlaying) {
-      // Reset hasPlayed flags when starting from beginning
-      if (currentTime === 0) {
-        setMidiData(midiData.map(note => ({ ...note, hasPlayed: false })));
-      }
-      startTimeRef.current = performance.now() - (currentTime * 1000);
+       // Stop all sources when paused
+      activeSources.forEach(source => source.stop());
+      setActiveSources(new Map());
+    } else {
+        startTimeRef.current = performance.now() - (currentTime * 1000);
     }
     
     setIsPlaying(!isPlaying);
@@ -219,16 +201,30 @@ const MidiPlayer = () => {
     setIsPlaying(false);
     setCurrentTime(0);
     startTimeRef.current = null;
-    setMidiData(midiData.map(note => ({ 
-      ...note, 
+    setActiveSources(new Map());
+    setMidiData(midiData.map(note => ({
+      ...note,
       isPlaying: false,
-      hasPlayed: false 
     })));
+  };
+
+    const toggleMute = (track: number) => {
+    setMutedTracks(prev =>
+      prev.includes(track) ? prev.filter(t => t !== track) : [...prev, track]
+    );
+      // Stop all sources on this track
+      activeSources.forEach((source, key) => {
+        const parts = key.split('-')
+        const trackNumber = parseInt(parts[2])
+        if (trackNumber === track) {
+           source.stop()
+           activeSources.delete(key)
+        }
+      })
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
-      {/* File upload section */}
       <div className="mb-6">
         <input
           type="file"
@@ -256,7 +252,6 @@ const MidiPlayer = () => {
         )}
       </div>
 
-      {/* Controls section */}
       <div className="mb-4 flex gap-2">
         <button
           onClick={handlePlayPause}
@@ -266,7 +261,7 @@ const MidiPlayer = () => {
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}
           {isPlaying ? 'Pause' : 'Play'}
         </button>
-        
+
         <button
           onClick={handleReset}
           disabled={!midiData.length || isLoading}
@@ -277,16 +272,17 @@ const MidiPlayer = () => {
         </button>
       </div>
 
-      {/* Add MidiViewer and transform midiData into note objects */}
-      {<MidiViewer
+      <MidiViewer
         notes={midiData.map(m => ({
           note: getNoteName(m.note),
           startTime: m.time,
           duration: m.duration,
-          track: m.track // Ensure track number is included
+          track: m.track
         }))}
         currentTime={currentTime}
-      />}
+        mutedTracks={mutedTracks}
+        toggleMute={toggleMute}
+      />
     </div>
   );
 };
