@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PianoKeyboard from './components/PianoKeyboard';
 import Soundfont, { Player } from 'soundfont-player';
+import MidiPlayer from './components/MidiPlayer';
 
 const App: React.FC = () => {
   const [pressedKeys, setPressedKeys] = useState<string[]>([]);
@@ -56,6 +57,7 @@ const App: React.FC = () => {
     <div className="App">
       <h1>25 Keys MIDI Controller</h1>
       <PianoKeyboard pressedKeys={pressedKeys} />
+      <MidiPlayer />
     </div>
   );
 };

@@ -3,17 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@tonejs/midi": "^2.0.28",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "cra-template": "1.2.0",
+    "lucide-react": "^0.469.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "5.0.1",
     "soundfont-player": "^0.12.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-scripts start --config webpack.config.js",
+    "build": "react-scripts build --config webpack.config.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -36,6 +38,9 @@
     ]
   },
   "devDependencies": {
-    "@types/webmidi": "^2.1.0"
+    "@types/webmidi": "^2.1.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17"
   }
 }
