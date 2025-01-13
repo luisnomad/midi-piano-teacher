@@ -3,6 +3,7 @@ import { Midi } from '@tonejs/midi';
 import Soundfont from 'soundfont-player';
 import { Upload, Play, Pause, RotateCcw } from 'lucide-react';
 import MidiViewer from './MidiViewer';
+import NotesScroller from './NotesScroller';
 
 interface Note {
   note: number;
@@ -282,6 +283,11 @@ const MidiPlayer = () => {
         currentTime={currentTime}
         mutedTracks={mutedTracks}
         toggleMute={toggleMute}
+      />
+
+      <NotesScroller
+        notes={midiData}
+        currentTime={currentTime}
       />
     </div>
   );
