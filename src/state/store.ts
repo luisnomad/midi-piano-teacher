@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { create } from 'zustand';
 
 interface GameState {
   gameMode: 'Guess the Note' | 'Song Mode' | null;
