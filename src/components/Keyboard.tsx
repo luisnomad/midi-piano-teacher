@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useStore from '../state/store';
 
 const whiteKeys = [
   { id: 'C1', note: 'C1' },
@@ -32,7 +33,7 @@ const blackKeys = [
 ];
 
 const Keyboard = () => {
-  const [pressedKeys, setPressedKeys] = useState<string[]>([]);
+  const { pressedKeys, setPressedKeys } = useStore();
 
   const handleKeyDown = (note: string) => {
     if (!pressedKeys.includes(note)) {

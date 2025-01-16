@@ -62,3 +62,32 @@ input[type="range"]::-moz-range-thumb {
   border: 1px solid #ffcc00;
   box-shadow: 0 0 10px rgba(255, 204, 0, 0.5), 0 0 20px rgba(255, 204, 0, 0.5), 0 0 30px rgba(255, 204, 0, 0.5);
 }
+
+.dark-theme {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+.glowing-element {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.5), 0 0 30px rgba(255, 255, 255, 0.5);
+}
+
+.sharp-yellow {
+  color: #ffcc00;
+}
+
+.sharp-green {
+  color: #00ff00;
+}
+
+.sharp-cyan {
+  color: #00ffff;
+}
+
+.sharp-red {
+  color: #ff0000;
+}
+
+.modern-font {
+  font-family: 'Roboto', sans-serif;
+}
