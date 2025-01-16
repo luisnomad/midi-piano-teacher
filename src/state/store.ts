@@ -20,6 +20,7 @@ interface GameState {
     muteAll: boolean;
   };
   errors: string[];
+  pressedKeys: string[];
   setGameMode: (mode: 'Guess the Note' | 'Song Mode' | null) => void;
   setGuessNoteState: (state: Partial<GameState['guessNoteState']>) => void;
   setSongModeState: (state: Partial<GameState['songModeState']>) => void;
@@ -27,6 +28,7 @@ interface GameState {
   setSettings: (settings: Partial<GameState['settings']>) => void;
   addError: (error: string) => void;
   clearErrors: () => void;
+  setPressedKeys: (keys: string[]) => void;
 }
 
 const useStore = create<GameState>((set) => ({
@@ -49,6 +51,7 @@ const useStore = create<GameState>((set) => ({
     muteAll: false,
   },
   errors: [],
+  pressedKeys: [],
   setGameMode: (mode) => set({ gameMode: mode }),
   setGuessNoteState: (state) => set((prev) => ({
     guessNoteState: { ...prev.guessNoteState, ...state },
@@ -64,6 +67,7 @@ const useStore = create<GameState>((set) => ({
     errors: [...prev.errors, error],
   })),
   clearErrors: () => set({ errors: [] }),
+  setPressedKeys: (keys) => set({ pressedKeys: keys }),
 }));
 
 export default useStore;

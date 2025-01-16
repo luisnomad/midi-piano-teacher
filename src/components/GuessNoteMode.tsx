@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Keyboard from '../components/Keyboard';
+import Keyboard from './Keyboard';
 import useStore from '../state/store';
 
 const GuessNoteMode: React.FC = () => {

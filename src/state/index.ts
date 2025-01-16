@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { createStore } from 'zustand/vanilla';
 
 interface GameState {
   gameMode: 'Guess the Note' | 'Song Mode' | null;
@@ -29,7 +29,7 @@ interface GameState {
   clearErrors: () => void;
 }
 
-const useStore = create<GameState>((set) => ({
+const useStore = createStore<GameState>((set) => ({
   gameMode: null,
   guessNoteState: {
     score: 0,

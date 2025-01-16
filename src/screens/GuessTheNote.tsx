@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Keyboard from '../components/Keyboard';
-import { useStore } from '../state/store';
+import useStore from '../state/store';
 
 const GuessTheNote: React.FC = () => {
   const [currentNote, setCurrentNote] = useState<string | null>(null);
