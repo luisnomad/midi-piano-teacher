@@ -1,64 +1,29 @@
-import React, { useEffect, useState, useRef } from 'react';
-import PianoKeyboard from './components/PianoKeyboard';
-import Soundfont, { Player } from 'soundfont-player';
-import MidiPlayer from './components/MidiPlayer';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import MainMenu from './screens/MainMenu';
+import Settings from './screens/Settings';
+import GuessTheNote from './screens/GuessTheNote';
+import SongMode from './screens/SongMode';
+import useStore from './state/store';
 
 const App: React.FC = () => {
-  const [pressedKeys, setPressedKeys] = useState<string[]>([]);
-  const playerRef = useRef<Player | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-
-  const getMIDIKeyId = (note: number): string => `Key${note}`;
+  const { gameMode, setGameMode } = useStore();
 
   useEffect(() => {
-    const initAudio = async () => {
-      audioContextRef.current = new AudioContext();
-      playerRef.current = await Soundfont.instrument(
-        audioContextRef.current,
-        'acoustic_grand_piano'
-      );
-    };
-
-    const handleMIDIMessage = (message: WebMidi.MIDIMessageEvent) => {
-      const [status, note, velocity] = message.data;
-      const keyId = getMIDIKeyId(note);
-      
-      // Note on (144) with velocity > 0
-      if (status === 144 && velocity > 0) {
-        setPressedKeys(prev => [...prev, keyId]);
-        playerRef.current?.play(note.toString());
-      }
-      // Note off (128) or note on with velocity 0
-      else if (status === 128 || (status === 144 && velocity === 0)) {
-        setPressedKeys(prev => prev.filter(key => key !== keyId));
-        playerRef.current?.stop();
-      }
-    };
-
-    const initMIDI = async () => {
-      if (navigator.requestMIDIAccess) {
-        const midiAccess = await navigator.requestMIDIAccess();
-        midiAccess.inputs.forEach(input => {
-          input.onmidimessage = handleMIDIMessage;
-        });
-      }
-    };
-
-    initAudio();
-    initMIDI();
-
-    return () => {
-      audioContextRef.current?.close();
-      playerRef.current?.stop();
-    };
+    // Initialize game mode or other state if needed
   }, []);
 
   return (
-    <div className="App">
-      <h1>25 Keys MIDI Controller</h1>
-      <PianoKeyboard pressedKeys={pressedKeys} />
-      <MidiPlayer />
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/guess-the-note" element={<GuessTheNote />} />
+          <Route path="/song-mode" element={<SongMode />} />
+          <Route path="/" element={<MainMenu />} />
+        </Routes>
+      </div>
+    </Router>
   );
 };
 
