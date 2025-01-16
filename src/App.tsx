@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import MainMenu from './screens/MainMenu';
 import Settings from './screens/Settings';
 import GuessTheNote from './screens/GuessTheNote';
@@ -16,20 +16,12 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="App">
-        <Switch>
-          <Route path="/settings">
-            <Settings />
-          </Route>
-          <Route path="/guess-the-note">
-            <GuessTheNote />
-          </Route>
-          <Route path="/song-mode">
-            <SongMode />
-          </Route>
-          <Route path="/">
-            <MainMenu />
-          </Route>
-        </Switch>
+        <Routes>
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/guess-the-note" element={<GuessTheNote />} />
+          <Route path="/song-mode" element={<SongMode />} />
+          <Route path="/" element={<MainMenu />} />
+        </Routes>
       </div>
     </Router>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dropdown, Button } from '../components/UIElements';
-import { useStore } from '../state/store';
+import useStore from '../state/store';
 
 const Settings: React.FC = () => {
   const [midiInputs, setMidiInputs] = useState<WebMidi.MIDIInput[]>([]);
